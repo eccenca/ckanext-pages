@@ -14,7 +14,12 @@
       <li class="dataset-item">
         <h3 class="dataset-heading">
           <a href="{{ url }}" >{{ page.title }}</a>
-        </h3>
+          {% for locale in h.get_available_locales() %}
+            {% if locale == page.lang %}
+              <small class="pages-language-tag">({{ locale.display_name or locale.english_name }})</small>
+            {% endif %}
+          {% endfor %}
+                  </h3>
         {% if page.content %}
           {{ h.markdown_extract(page.content) }}
         {% else %}
