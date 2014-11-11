@@ -67,6 +67,9 @@ class PagesPlugin(p.SingletonPlugin):
             p.toolkit.add_template_directory(config, 'theme/templates_group')
         if self.organization_pages:
             p.toolkit.add_template_directory(config, 'theme/templates_organization')
+        p.toolkit.add_template_directory(config, 'templates')
+        p.toolkit.add_public_directory(config, 'public/ckanext/pages')
+        p.toolkit.add_resource('public/ckanext/pages', 'ckanext_pages')
 
 
     def configure(self, config):

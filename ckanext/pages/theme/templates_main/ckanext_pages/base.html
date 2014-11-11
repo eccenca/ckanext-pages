@@ -1,6 +1,11 @@
 {% extends 'page.html' %}
 
-{% block page_header %}{% endblock %}
+{% block page_header %}
+<link rel="stylesheet" href="{% url_for_static '/public_pages/base_styles.css' %}">
+<script type="text/javascript" src="{% url_for_static '/public_pages/base.js' %}">
+
+</script> 
+{% endblock %}
 
 {% block secondary_content %}
   <div class="module module-narrow module-shallow">
