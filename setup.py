@@ -5,13 +5,13 @@ version = '0.1'
 setup(
 	name='ckanext-pages',
 	version=version,
-	description='Basic CMS extension for ckan',
+	description='Extended CMS extension for ckan',
 	long_description='',
 	classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
 	keywords='',
-	author='David Raznick',
-	author_email='david.raznick@gokfn.org',
-	url='',
+	author='Henri Knochenhauer',
+	author_email='henri.knochenhauer@eccenca.com',
+	url='http://eccenca.com',
 	license='',
 	packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
 	namespace_packages=['ckanext', 'ckanext.pages'],
