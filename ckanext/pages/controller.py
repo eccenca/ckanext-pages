@@ -1,6 +1,8 @@
 import ckan.plugins as p
+import logging
 
 _ = p.toolkit._
+logger = logging.getLogger(__name__)
 
 class PagesController(p.toolkit.BaseController):
     controller = 'ckanext.pages.controller:PagesController'
@@ -239,7 +241,7 @@ class PagesController(p.toolkit.BaseController):
 
         if p.toolkit.request.method == 'POST' and not data:
             data = p.toolkit.request.POST
-            items = ['title', 'name', 'content', 'private', 'order']
+            items = ['title', 'name', 'content', 'lang', 'private', 'order']
 
             # update config from form
             for item in items:
@@ -247,6 +249,8 @@ class PagesController(p.toolkit.BaseController):
                     _page[item] = data[item]
             _page['org_id'] = None
             _page['page'] = page
+            logger.info('lang tag: {0}.'.format(_page))
+
             try:
                 junk = p.toolkit.get_action('ckanext_pages_update')(
                     data_dict=_page

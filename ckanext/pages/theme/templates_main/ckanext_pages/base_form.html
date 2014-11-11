@@ -21,6 +21,7 @@
 
 {% set data = data or {} %}
 {% set errors = errors or {} %}
+{% set current_lang = request.environ.CKAN_LANG %}
 
 {% if not page %}
   <h1>{{ _('Add page') }}</h1>
@@ -56,6 +57,19 @@
         <select id="field-order" name="order">
           {% for option in [('',''), ('1','1'), ('2', '2'), ('3', '3') , ('4', '4')] %}
           <option value="{{ option[0] }}" {% if option[0] == data.order %}selected="selected"{% endif %}>{{ option[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if not hide_field_order %}
+    <div class="control-group">
+      <label for="field-order" class="control-label">{{ _('Language') }}</label>
+      <div class="controls">
+        <select id="field-order" name="lang">
+          {% for locale in h.get_available_locales() %}
+          <option value="{{ locale }}" {% if locale == data.lang %}selected="selected"{% endif %}>{{ locale.display_name or locale.english_name }}</option>
           {% endfor %}
         </select>
       </div>

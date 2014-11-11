@@ -3,8 +3,15 @@ import datetime
 import ckan.plugins as p
 import ckan.lib.navl.dictization_functions as df
 import ckan.new_authz as new_authz
+import logging
+import pylons
+
 
 import db
+logger = logging.getLogger(__name__)
+
+LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl']
+
 def page_name_validator(key, data, errors, context):
     session = context['session']
     page = context.get('page')
@@ -24,7 +31,7 @@ schema = {
     'name': [p.toolkit.get_validator('not_empty'), unicode,
              p.toolkit.get_validator('name_validator'), page_name_validator],
     'content': [p.toolkit.get_validator('ignore_missing'), unicode],
-  #  'lang': [p.toolkit.get_validator('not_empty'), unicode],
+    'lang': [p.toolkit.get_validator('not_empty'), unicode],
     'order': [p.toolkit.get_validator('ignore_missing'),
               unicode],
     'private': [p.toolkit.get_validator('ignore_missing'),
@@ -76,6 +83,7 @@ def _pages_list(context, data_dict):
     return [{'title': pg.title,
              'content': pg.content,
              'name': pg.name,
+             'lang': pg.lang,
              'group_id': pg.group_id,
             } for pg in out]
 
@@ -111,7 +119,8 @@ def _pages_update(context, data_dict):
         out = db.Page()
         out.group_id = org_id
         out.name = page
-    items = ['title', 'content', 'name', 'private', 'order']
+    items = ['title', 'content', 'name', 'lang', 'private', 'order']
+    logger.info('actions - language: {0}.'.format(get_language()))
     for item in items:
         setattr(out, item, data.get(item))
 
@@ -217,3 +226,16 @@ def group_pages_list(context, data_dict):
     except p.toolkit.NotAuthorized:
         p.toolkit.abort(401, p.toolkit._('Not authorized to see this page'))
     return _pages_list(context, data_dict)
+
+def get_language():
+    lang_set = set(LANGS)
+    current_lang = pylons.request.environ['CKAN_LANG']
+    # fallback to default locale if locale not in suported langs
+    if not current_lang in lang_set:
+        current_lang = config.get('ckan.locale_default')
+    # fallback to english if default locale is not supported
+    if not current_lang in lang_set:
+        current_lang = 'en'
+    # treat current lang differenly so remove from set
+    lang_set.remove(current_lang)
+    return current_lang  
