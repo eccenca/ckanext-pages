@@ -19,7 +19,7 @@ def page_name_validator(key, data, errors, context):
     if page and page == data[key]:
         return
 
-    query = session.query(db.Page.name).filter_by(name=data[key], group_id=group_id)
+    query = session.query(db.Page.name).filter_by(name=data[key], group_id=group_id, lang=context.get('lang'))
     result = query.first()
     if result:
         errors[key].append(
@@ -44,18 +44,22 @@ schema = {
 
 
 def _pages_show(context, data_dict):
+    lang = get_language()
     if db.pages_table is None:
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
     page = data_dict.get('page')
-    out = db.Page.get(group_id=org_id, name=page)
+    out = db.Page.get(group_id=org_id, name=page, lang=lang) 
+    # , lang= get_language()
     if out:
         out = db.table_dictize(out, context)
     return out
 
 
 def _pages_list(context, data_dict):
+    #lang = get_language()
     search = {}
+    #search['lang'] = lang
     if db.pages_table is None:
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
@@ -89,11 +93,12 @@ def _pages_list(context, data_dict):
 
 
 def _pages_delete(context, data_dict):
+    lang = get_language()
     if db.pages_table is None:
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
     page = data_dict.get('page')
-    out = db.Page.get(group_id=org_id, name=page)
+    out = db.Page.get(group_id=org_id, name=page, lang=lang)
     if out:
         session = context['session']
         session.delete(out)
@@ -101,6 +106,7 @@ def _pages_delete(context, data_dict):
 
 
 def _pages_update(context, data_dict):
+    lang = get_language()
     if db.pages_table is None:
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
@@ -114,13 +120,14 @@ def _pages_update(context, data_dict):
     if errors:
         raise p.toolkit.ValidationError(errors)
 
-    out = db.Page.get(group_id=org_id, name=page)
+    out = db.Page.get(group_id=org_id, name=page, lang=lang)
     if not out:
         out = db.Page()
         out.group_id = org_id
         out.name = page
+        out.lang = lang
     items = ['title', 'content', 'name', 'lang', 'private', 'order']
-    logger.info('actions - language: {0}.'.format(get_language()))
+
     for item in items:
         setattr(out, item, data.get(item))
 

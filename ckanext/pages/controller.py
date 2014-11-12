@@ -1,8 +1,12 @@
 import ckan.plugins as p
 import logging
+import pylons
 
 _ = p.toolkit._
 logger = logging.getLogger(__name__)
+
+LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl']
+
 
 class PagesController(p.toolkit.BaseController):
     controller = 'ckanext.pages.controller:PagesController'
@@ -197,11 +201,12 @@ class PagesController(p.toolkit.BaseController):
             return self._pages_list_pages()
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
-                       'page': page,}
+                       'page': page  }
         )
         if _page is None:
             return self._pages_list_pages()
         p.toolkit.c.page = _page
+        logger.debug('selected page: {0}.'.format(_page))
         return p.toolkit.render('ckanext_pages/page.html')
 
     def _pages_list_pages(self):
@@ -232,16 +237,18 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None):
         if page:
             page = page[1:]
+            lang = self._get_language()
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
-                       'page': page,}
+                       'page': page,
+                       'lang': lang}
         )
         if _page is None:
             _page = {}
 
         if p.toolkit.request.method == 'POST' and not data:
             data = p.toolkit.request.POST
-            items = ['title', 'name', 'content', 'lang', 'private', 'order']
+            items = ['title', 'name', 'content', 'private', 'order']
 
             # update config from form
             for item in items:
@@ -249,7 +256,8 @@ class PagesController(p.toolkit.BaseController):
                     _page[item] = data[item]
             _page['org_id'] = None
             _page['page'] = page
-            logger.info('lang tag: {0}.'.format(_page))
+            _page['lang'] = lang
+            logger.debug('selected language: {0}.'.format(_page))
 
             try:
                 junk = p.toolkit.get_action('ckanext_pages_update')(
@@ -279,5 +287,16 @@ class PagesController(p.toolkit.BaseController):
         return p.toolkit.render('ckanext_pages/pages_edit.html',
                                extra_vars=vars)
 
-
+    def _get_language(self):
+        lang_set = set(LANGS)
+        current_lang = pylons.request.environ['CKAN_LANG']
+        # fallback to default locale if locale not in suported langs
+        if not current_lang in lang_set:
+            current_lang = config.get('ckan.locale_default')
+        # fallback to english if default locale is not supported
+        if not current_lang in lang_set:
+            current_lang = 'en'
+        # treat current lang differenly so remove from set
+        lang_set.remove(current_lang)
+        return current_lang  
 

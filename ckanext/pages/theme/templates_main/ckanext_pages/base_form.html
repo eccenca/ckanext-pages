@@ -63,18 +63,6 @@
     </div>
   {% endif %}
 
-  {% if not hide_field_order %}
-    <div class="control-group">
-      <label for="field-order" class="control-label">{{ _('Language') }}</label>
-      <div class="controls">
-        <select id="field-order" name="lang">
-          {% for locale in h.get_available_locales() %}
-          <option value="{{ locale }}" {% if locale == data.lang %}selected="selected"{% endif %}>{{ locale.display_name or locale.english_name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-  {% endif %}
 
   {{ form.markdown('content', id='field-content', label=_('Content'), placeholder=_('My content'), value=data.content, error=errors.content) }}
 
