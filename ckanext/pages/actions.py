@@ -57,7 +57,7 @@ def _pages_show(context, data_dict):
 
 
 def _pages_list(context, data_dict):
-    #lang = get_language()
+    lang = get_language()
     search = {}
     #search['lang'] = lang
     if db.pages_table is None:

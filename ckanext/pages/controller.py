@@ -237,11 +237,12 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None):
         if page:
             page = page[1:]
-            lang = self._get_language()
+            #lang = self._get_language()
+            logger.debug('selected language: {0}.'.format(self._get_language()))
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
                        'page': page,
-                       'lang': lang}
+                       'lang': self._get_language()}
         )
         if _page is None:
             _page = {}
@@ -256,7 +257,7 @@ class PagesController(p.toolkit.BaseController):
                     _page[item] = data[item]
             _page['org_id'] = None
             _page['page'] = page
-            _page['lang'] = lang
+            _page['lang'] = self._get_language()
             logger.debug('selected language: {0}.'.format(_page))
 
             try:
