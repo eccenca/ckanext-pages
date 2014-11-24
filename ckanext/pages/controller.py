@@ -1,6 +1,7 @@
 import ckan.plugins as p
 import logging
 import pylons
+from pylons import config
 
 _ = p.toolkit._
 logger = logging.getLogger(__name__)
