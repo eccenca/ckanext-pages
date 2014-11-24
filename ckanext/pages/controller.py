@@ -157,7 +157,7 @@ class PagesController(p.toolkit.BaseController):
             page = page[1:]
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': p.toolkit.c.group_dict['id'],
-                       'page': page,}
+                       'page': page}
         )
         if _page is None:
             _page = {}
@@ -202,12 +202,11 @@ class PagesController(p.toolkit.BaseController):
             return self._pages_list_pages()
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
-                       'page': page  }
+                       'page': page, 'lang':self._get_language(),}
         )
         if _page is None:
             return self._pages_list_pages()
         p.toolkit.c.page = _page
-        logger.debug('selected page: {0}.'.format(_page))
         return p.toolkit.render('ckanext_pages/page.html')
 
     def _pages_list_pages(self):
@@ -238,19 +237,20 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None):
         if page:
             page = page[1:]
-            #lang = self._get_language()
-            logger.debug('selected language: {0}.'.format(self._get_language()))
+            logger.debug('THIS PAGE: {0}.'. format(page))
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
                        'page': page,
-                       'lang': self._get_language()}
+                       'lang': self._get_language(),}
         )
+        logger.debug('_PAGE: {0}.'. format(_page))
+
         if _page is None:
             _page = {}
 
         if p.toolkit.request.method == 'POST' and not data:
             data = p.toolkit.request.POST
-            items = ['title', 'name', 'content', 'private', 'order']
+            items = ['title', 'name', 'content', 'lang', 'private', 'order']
 
             # update config from form
             for item in items:
@@ -258,9 +258,7 @@ class PagesController(p.toolkit.BaseController):
                     _page[item] = data[item]
             _page['org_id'] = None
             _page['page'] = page
-            _page['lang'] = self._get_language()
-            logger.debug('selected language: {0}.'.format(_page))
-
+            logger.debug('text: {0}.'. format(_page))
             try:
                 junk = p.toolkit.get_action('ckanext_pages_update')(
                     data_dict=_page

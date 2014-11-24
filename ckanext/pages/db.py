@@ -3,7 +3,7 @@ import uuid
 
 import sqlalchemy as sa
 from sqlalchemy.orm import class_mapper
-
+from sqlalchemy.sql import func
 
 pages_table = None
 Page = None
@@ -27,11 +27,14 @@ def init_db(model):
             '''Finds a single entity in the register.'''
             order = kw.pop('order', False)
 
+            #subq = model.Session.query(func.array_to_string(func.array_agg(cls.lang), ',').label('langs')).filter_by(**kw).group_by(cls.name).subquery()
+            #subq.c.langs
             query = model.Session.query(cls).autoflush(False)
             query = query.filter_by(**kw)
             if order:
                 query = query.order_by(cls.order).filter(cls.order != '')
-            return query.all()
+            q = query.all()
+            return q
 
     global Page
     Page = _Page

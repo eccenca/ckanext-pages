@@ -59,7 +59,6 @@ def _pages_show(context, data_dict):
     if not out:
         lang = get_default_language()
         out = db.Page.get(group_id=org_id, name=page, lang=lang)
-        logger.debug('selected page: {0}.'.format(out))
     return out
 
 
@@ -91,6 +90,7 @@ def _pages_list(context, data_dict):
         if not member:
             search['private'] = False
     out = db.Page.pages(**search)
+
     return [{'title': pg.title,
              'content': pg.content,
              'name': pg.name,
@@ -132,7 +132,6 @@ def _pages_update(context, data_dict):
         out = db.Page()
         out.group_id = org_id
         out.name = page
-        out.lang = lang
     items = ['title', 'content', 'name', 'lang', 'private', 'order']
 
     for item in items:
