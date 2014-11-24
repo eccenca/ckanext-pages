@@ -5,6 +5,8 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.new_authz as new_authz
 import logging
 import pylons
+from pylons import config
+
 
 
 import db
@@ -53,6 +55,11 @@ def _pages_show(context, data_dict):
     # , lang= get_language()
     if out:
         out = db.table_dictize(out, context)
+    # if not entry was found load entry for default language
+    if not out:
+        lang = get_default_language()
+        out = db.Page.get(group_id=org_id, name=page, lang=lang)
+        logger.debug('selected page: {0}.'.format(out))
     return out
 
 
@@ -246,3 +253,13 @@ def get_language():
     # treat current lang differenly so remove from set
     lang_set.remove(current_lang)
     return current_lang  
+
+def get_default_language():
+    lang_set = set(LANGS)
+    current_default_lang = config.get('ckan.locale_default')
+     # fallback to english if default locale is not supported
+    if not current_default_lang in lang_set:
+        current_default_lang = 'en'
+    # treat current lang differenly so remove from set
+    lang_set.remove(current_default_lang)
+    return current_default_lang

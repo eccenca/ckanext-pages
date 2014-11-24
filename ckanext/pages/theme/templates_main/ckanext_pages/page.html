@@ -8,7 +8,22 @@
     {% if h.check_access('ckanext_pages_update') %}
       {% link_for _('Edit'), controller='ckanext.pages.controller:PagesController', action='pages_edit', page='/' + c.page.name, class_='btn btn-primary pull-right', icon='edit' %}
     {% endif %}
-    <h1 class="page-heading">{{ c.page.title }}</h1>{{current_lang}}
+
+    {% if current_lang != c.page.lang %}
+      <div class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ _('This page is not available for your chosen language') }}
+      </div>
+    {% endif %}
+    <h1 class="page-heading">{{ c.page.title }}
+       {% if current_lang != c.page.lang %}
+        {% for locale in h.get_available_locales() %}
+          {% if locale == c.page.lang %}
+            <small class="pages-language-tag">({{ locale.display_name or locale.english_name }})</small>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </h1>
     {% if c.page.content %}
       {{ h.render_markdown(c.page.content) }}
     {% else %}
