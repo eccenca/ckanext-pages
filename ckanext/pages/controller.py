@@ -6,7 +6,7 @@ from pylons import config
 _ = p.toolkit._
 logger = logging.getLogger(__name__)
 
-LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl']
+LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl', 'pt_BR', 'ja', 'cs_CZ', 'ca', 'el', 'sv', 'sr', 'no', 'sk', 'fi', 'ru', 'bg', ]
 
 
 class PagesController(p.toolkit.BaseController):
@@ -237,7 +237,7 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None):
         if page:
             page = page[1:]
-            logger.debug('THIS PAGE: {0}.'. format(page))
+            
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
                        'page': page,
@@ -268,7 +268,16 @@ class PagesController(p.toolkit.BaseController):
                 error_summary = e.error_summary
                 return self.pages_edit('/' + page, data,
                                  errors, error_summary)
-            p.toolkit.redirect_to(p.toolkit.url_for('pages_show', page='/' + _page['name']))
+            redirect_url=p.toolkit.url_for('pages_show', page='/' + _page['name'])
+            logger.debug('LINK1 : {0}'. format(redirect_url))
+            logger.debug('LINK1 : {0}'. format(redirect_url[1:]))
+            logger.debug('LINK1 : {0}'. format(redirect_url[1:].startswith( _page['lang'] )))
+            if redirect_url[1:].startswith( _page['lang'] ):
+                redirect_url = redirect_url.replace('/'+_page['lang'], '', 1)
+            
+            logger.debug('LINK1a : {0}'. format(redirect_url))
+            p.toolkit.redirect_to(str(redirect_url))
+
 
         try:
             p.toolkit.check_access('ckanext_pages_update', {'user': p.toolkit.c.user or p.toolkit.c.author})
