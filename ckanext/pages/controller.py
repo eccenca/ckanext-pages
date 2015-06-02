@@ -1,11 +1,12 @@
 import ckan.plugins as p
 import logging
 import pylons
+from pylons import config
 
 _ = p.toolkit._
 logger = logging.getLogger(__name__)
 
-LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl']
+LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl', 'pt_BR', 'ja', 'cs_CZ', 'ca', 'el', 'sv', 'sr', 'no', 'sk', 'fi', 'ru', 'bg', ]
 
 
 class PagesController(p.toolkit.BaseController):
@@ -156,7 +157,7 @@ class PagesController(p.toolkit.BaseController):
             page = page[1:]
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': p.toolkit.c.group_dict['id'],
-                       'page': page,}
+                       'page': page}
         )
         if _page is None:
             _page = {}
@@ -201,12 +202,11 @@ class PagesController(p.toolkit.BaseController):
             return self._pages_list_pages()
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
-                       'page': page  }
+                       'page': page, 'lang':self._get_language(),}
         )
         if _page is None:
             return self._pages_list_pages()
         p.toolkit.c.page = _page
-        logger.debug('selected page: {0}.'.format(_page))
         return p.toolkit.render('ckanext_pages/page.html')
 
     def _pages_list_pages(self):
@@ -237,18 +237,20 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None):
         if page:
             page = page[1:]
-            lang = self._get_language()
+            
         _page = p.toolkit.get_action('ckanext_pages_show')(
             data_dict={'org_id': None,
                        'page': page,
-                       'lang': lang}
+                       'lang': self._get_language(),}
         )
+        logger.debug('_PAGE: {0}.'. format(_page))
+
         if _page is None:
             _page = {}
 
         if p.toolkit.request.method == 'POST' and not data:
             data = p.toolkit.request.POST
-            items = ['title', 'name', 'content', 'private', 'order']
+            items = ['title', 'name', 'content', 'lang', 'private', 'order']
 
             # update config from form
             for item in items:
@@ -256,9 +258,7 @@ class PagesController(p.toolkit.BaseController):
                     _page[item] = data[item]
             _page['org_id'] = None
             _page['page'] = page
-            _page['lang'] = lang
-            logger.debug('selected language: {0}.'.format(_page))
-
+            logger.debug('text: {0}.'. format(_page))
             try:
                 junk = p.toolkit.get_action('ckanext_pages_update')(
                     data_dict=_page
@@ -268,7 +268,16 @@ class PagesController(p.toolkit.BaseController):
                 error_summary = e.error_summary
                 return self.pages_edit('/' + page, data,
                                  errors, error_summary)
-            p.toolkit.redirect_to(p.toolkit.url_for('pages_show', page='/' + _page['name']))
+            redirect_url=p.toolkit.url_for('pages_show', page='/' + _page['name'])
+            logger.debug('LINK1 : {0}'. format(redirect_url))
+            logger.debug('LINK1 : {0}'. format(redirect_url[1:]))
+            logger.debug('LINK1 : {0}'. format(redirect_url[1:].startswith( _page['lang'] )))
+            if redirect_url[1:].startswith( _page['lang'] ):
+                redirect_url = redirect_url.replace('/'+_page['lang'], '', 1)
+            
+            logger.debug('LINK1a : {0}'. format(redirect_url))
+            p.toolkit.redirect_to(str(redirect_url))
+
 
         try:
             p.toolkit.check_access('ckanext_pages_update', {'user': p.toolkit.c.user or p.toolkit.c.author})

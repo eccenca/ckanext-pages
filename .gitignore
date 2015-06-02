@@ -9,3 +9,4 @@ build/
 dist/
 distribute-*
 *.DS_Store
+.idea

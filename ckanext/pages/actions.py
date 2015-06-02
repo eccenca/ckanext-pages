@@ -5,12 +5,14 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.new_authz as new_authz
 import logging
 import pylons
+from pylons import config
+
 
 
 import db
 logger = logging.getLogger(__name__)
 
-LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl']
+LANGS = ['en', 'fr', 'de', 'es', 'it', 'nl', 'ro', 'pt', 'pl', 'pt_BR', 'ja', 'cs_CZ', 'ca', 'el', 'sv', 'sr', 'no', 'sk', 'fi', 'ru', 'bg', ]
 
 def page_name_validator(key, data, errors, context):
     session = context['session']
@@ -50,16 +52,19 @@ def _pages_show(context, data_dict):
     org_id = data_dict.get('org_id')
     page = data_dict.get('page')
     out = db.Page.get(group_id=org_id, name=page, lang=lang) 
-    # , lang= get_language()
     if out:
         out = db.table_dictize(out, context)
+    # if no entry was found load entry for default language
+    if not out:
+        lang = get_default_language()
+        out = db.Page.get(group_id=org_id, name=page, lang=lang)
     return out
 
 
 def _pages_list(context, data_dict):
-    #lang = get_language()
+    lang = get_language()
     search = {}
-    #search['lang'] = lang
+    search['lang'] = lang
     if db.pages_table is None:
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
@@ -84,6 +89,7 @@ def _pages_list(context, data_dict):
         if not member:
             search['private'] = False
     out = db.Page.pages(**search)
+
     return [{'title': pg.title,
              'content': pg.content,
              'name': pg.name,
@@ -125,7 +131,6 @@ def _pages_update(context, data_dict):
         out = db.Page()
         out.group_id = org_id
         out.name = page
-        out.lang = lang
     items = ['title', 'content', 'name', 'lang', 'private', 'order']
 
     for item in items:
@@ -246,3 +251,13 @@ def get_language():
     # treat current lang differenly so remove from set
     lang_set.remove(current_lang)
     return current_lang  
+
+def get_default_language():
+    lang_set = set(LANGS)
+    current_default_lang = config.get('ckan.locale_default')
+     # fallback to english if default locale is not supported
+    if not current_default_lang in lang_set:
+        current_default_lang = 'en'
+    # treat current lang differenly so remove from set
+    lang_set.remove(current_default_lang)
+    return current_default_lang
