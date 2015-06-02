@@ -29,7 +29,9 @@
       {% endif %}
     </h1>
     {% if c.page.content %}
-      {{ h.render_markdown(c.page.content) }}
+      <div class="ckanext-pages-content">
+          {{ h.render_markdown(c.page.content) }}
+      </div>
     {% else %}
       <p class="empty">{{ _('This page currently has no content') }}</p>
     {% endif %}

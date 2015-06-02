@@ -4,6 +4,10 @@ import uuid
 import sqlalchemy as sa
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.sql import func
+try:
+    from sqlalchemy.engine.result import RowProxy
+except:
+    from sqlalchemy.engine.base import RowProxy
 
 pages_table = None
 Page = None
@@ -88,7 +92,7 @@ def table_dictize(obj, context, **kw):
     '''Get any model object and represent it as a dict'''
     result_dict = {}
 
-    if isinstance(obj, sa.engine.base.RowProxy):
+    if isinstance(obj, RowProxy):
         fields = obj.keys()
     else:
         ModelClass = obj.__class__
